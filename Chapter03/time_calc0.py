@@ -3,7 +3,7 @@ import pycuda.autoinit
 from pycuda import gpuarray
 from time import time
 import os
-print(os.environ['PATH'])
+
 
 if __name__ == "__main__":
     host_data = np.float32(np.random.random(50000000))
