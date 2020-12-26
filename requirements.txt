@@ -1,3 +1,4 @@
 pycuda
 scikit-cuda
 matplotlib
+pytest
