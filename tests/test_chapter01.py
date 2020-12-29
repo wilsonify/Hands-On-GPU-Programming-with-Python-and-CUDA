@@ -22,5 +22,6 @@ import os
 
 
 def test_smoke():
-    logging.info(f"PATH={os.environ['PATH']}")
+    print(f"PATH={os.environ['PATH']}")
+    print(f"CUDA_PATH={os.environ['CUDA_PATH']}")
     logging.info("fire?")
