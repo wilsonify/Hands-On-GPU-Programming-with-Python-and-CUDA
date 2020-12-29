@@ -1,11 +1,10 @@
-
 import numpy as np
 from pycuda.compiler import DynamicSourceModule
 import pycuda.autoinit
 from pycuda import gpuarray
 from random import shuffle
 
-DynamicQuicksortCode='''
+DynamicQuicksortCode = '''
 __device__ int partition(int * a, int lo, int hi)
 {
  int i = lo;
@@ -49,24 +48,22 @@ __global__ void quicksort_ker(int *a, int lo, int hi)
 }
 '''
 
-qsort_mod = DynamicSourceModule(DynamicQuicksortCode)
-
-qsort_ker = qsort_mod.get_function('quicksort_ker')
-
 if __name__ == '__main__':
+    qsort_mod = DynamicSourceModule(DynamicQuicksortCode)
+
+    qsort_ker = qsort_mod.get_function('quicksort_ker')
+    
     a = list(range(100))
     shuffle(a)
-    
+
     a = np.int32(a)
-    
+
     d_a = gpuarray.to_gpu(a)
-    
+
     print('Unsorted array: %s' % a)
-    
-    qsort_ker(d_a, np.int32(0), np.int32(a.size - 1), grid=(1,1,1), block=(1,1,1))
-    
+
+    qsort_ker(d_a, np.int32(0), np.int32(a.size - 1), grid=(1, 1, 1), block=(1, 1, 1))
+
     a_sorted = list(d_a.get())
-    
+
     print('Sorted array: %s' % a_sorted)
-
-

@@ -1,5 +1,6 @@
 import pycuda
 import pycuda.driver as drv
+
 drv.init()
 
 print('CUDA device query (PyCUDA version) \n')

@@ -1,10 +1,9 @@
-
 import numpy as np
 from pycuda.compiler import SourceModule
 import pycuda.autoinit
 from pycuda import gpuarray
 
-PtxCode='''
+PtxCode = '''
 
 __device__ void set_to_zero(int &x)
 {
@@ -73,7 +72,7 @@ __global__ void ptx_test_ker() {
  printf("Do split64 / combine64 work? : %s \\n", (orig == recon) ? "true" : "false"); 
  
 }'''
-
-ptx_mod = SourceModule(PtxCode)
-ptx_test_ker = ptx_mod.get_function('ptx_test_ker')
-ptx_test_ker(grid=(1,1,1), block=(1,1,1))
+if __name__ == "__main__":
+    ptx_mod = SourceModule(PtxCode)
+    ptx_test_ker = ptx_mod.get_function('ptx_test_ker')
+    ptx_test_ker(grid=(1, 1, 1), block=(1, 1, 1))

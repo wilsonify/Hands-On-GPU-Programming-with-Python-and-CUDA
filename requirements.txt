@@ -2,3 +2,4 @@ pycuda
 scikit-cuda
 matplotlib
 pytest
+sympy

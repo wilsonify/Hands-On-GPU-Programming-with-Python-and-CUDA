@@ -5,7 +5,7 @@ from pycuda.compiler import SourceModule
 import numpy as np
 from sympy import Rational
 
-ker = SourceModule(no_extern_c=True ,source='''
+ker = SourceModule(no_extern_c=True, source='''
 #include <curand_kernel.h>
 #define _PYTHAG(a,b)  (a*a + b*b)
 #define ULL  unsigned long long
@@ -42,29 +42,28 @@ __global__ void estimate_pi(ULL iters, ULL * hits)
 }// (End of 'extern "C"' here)
 ''')
 
+if __name__ == "__main__":
+    pi_ker = ker.get_function("estimate_pi")
 
+    threads_per_block = 32
+    blocks_per_grid = 512
 
-pi_ker = ker.get_function("estimate_pi")
+    total_threads = threads_per_block * blocks_per_grid
 
-threads_per_block = 32
-blocks_per_grid = 512 
+    hits_d = gpuarray.zeros((total_threads,), dtype=np.uint64)
 
-total_threads = threads_per_block * blocks_per_grid
+    iters = 2 ** 24
 
-hits_d = gpuarray.zeros((total_threads,),dtype=np.uint64)
+    pi_ker(np.uint64(iters), hits_d, grid=(blocks_per_grid, 1, 1), block=(threads_per_block, 1, 1))
 
-iters = 2**24   
+    total_hits = np.sum(hits_d.get())
+    total = np.uint64(total_threads) * np.uint64(iters)
 
-pi_ker(np.uint64(iters), hits_d, grid=(blocks_per_grid,1,1), block=(threads_per_block,1,1))
+    est_pi_symbolic = Rational(4) * Rational(int(total_hits), int(total))
 
-total_hits = np.sum( hits_d.get()  )
-total = np.uint64(total_threads) * np.uint64(iters)
+    est_pi = np.float(est_pi_symbolic.evalf())
 
-est_pi_symbolic =  Rational(4)*Rational(int(total_hits), int(total) )
+    print("Our Monte Carlo estimate of Pi is : %s" % est_pi)
+    print("NumPy's Pi constant is: %s " % np.pi)
 
-est_pi = np.float(est_pi_symbolic.evalf())
-
-print("Our Monte Carlo estimate of Pi is : %s" % est_pi)
-print("NumPy's Pi constant is: %s " % np.pi)
-
-print("Our estimate passes NumPy's 'allclose' : %s" % np.allclose(est_pi, np.pi))
+    print("Our estimate passes NumPy's 'allclose' : %s" % np.allclose(est_pi, np.pi))

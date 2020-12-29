@@ -1,11 +1,9 @@
-
 import numpy as np
 from pycuda.compiler import SourceModule
 import pycuda.autoinit
 from pycuda import gpuarray
 
-
-ShflSumCode='''
+ShflSumCode = '''
 __global__ void shfl_sum_ker(int *input, int *out) {
 
  int temp = input[threadIdx.x];
@@ -17,15 +15,15 @@ __global__ void shfl_sum_ker(int *input, int *out) {
      *out = temp;
 
 }'''
+if __name__ == "__main__":
+    shfl_mod = SourceModule(ShflSumCode)
+    shfl_sum_ker = shfl_mod.get_function('shfl_sum_ker')
 
-shfl_mod = SourceModule(ShflSumCode)
-shfl_sum_ker = shfl_mod.get_function('shfl_sum_ker')
+    array_in = gpuarray.to_gpu(np.int32(list(range(32))))
+    out = gpuarray.empty((1,), dtype=np.int32)
 
-array_in = gpuarray.to_gpu(np.int32(list(range(32))))
-out = gpuarray.empty((1,), dtype=np.int32)
+    shfl_sum_ker(array_in, out, grid=(1, 1, 1), block=(32, 1, 1))
 
-shfl_sum_ker(array_in, out, grid=(1,1,1), block=(32,1,1))
-
-print('Input array: %s' % array_in.get())
-print('Summed value: %s' % out.get()[0])
-print('Does this match with Python''s sum? : %s' % (out.get()[0] == sum(array_in.get()) ))
+    print('Input array: %s' % array_in.get())
+    print('Summed value: %s' % out.get()[0])
+    print('Does this match with Python''s sum? : %s' % (out.get()[0] == sum(array_in.get())))
