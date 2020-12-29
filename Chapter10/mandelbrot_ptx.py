@@ -7,8 +7,10 @@ import pycuda
 from pycuda import gpuarray
 import pycuda.autoinit
 
-
-mandel_mod = pycuda.driver.module_from_file('./mandelbrot.ptx')
+import os
+file_dir = os.path.dirname(__file__)
+print(f"file_dir = {file_dir}")
+mandel_mod = pycuda.driver.module_from_file(f'{file_dir}/mandelbrot.ptx')
 mandel_ker = mandel_mod.get_function('mandelbrot_ker')
 
 def mandelbrot(breadth, low, high, max_iters, upper_bound):

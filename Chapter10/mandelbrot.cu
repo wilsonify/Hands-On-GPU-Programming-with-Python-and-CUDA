@@ -52,7 +52,7 @@ extern "C" __global__ void mandelbrot_ker(float * lattice, float * mandelbrot_gr
 }
 
 // Linux users:  remove "__declspec(dllexport)" from the line below.
-extern "C" __declspec(dllexport) void launch_mandelbrot(float * lattice,  float * mandelbrot_graph, int max_iters, float upper_bound, int lattice_size)
+extern "C" void launch_mandelbrot(float * lattice,  float * mandelbrot_graph, int max_iters, float upper_bound, int lattice_size)
 {
     
     int num_bytes_lattice = sizeof(float) * lattice_size;

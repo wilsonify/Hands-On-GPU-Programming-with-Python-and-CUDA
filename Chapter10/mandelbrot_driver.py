@@ -3,7 +3,7 @@ from time import time
 import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
-from cuda_driver import *
+from Chapter10.cuda_driver import *
 
 def mandelbrot(breadth, low, high, max_iters, upper_bound):
     cuInit(0)
