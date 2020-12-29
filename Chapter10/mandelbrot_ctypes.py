@@ -12,7 +12,7 @@ if platform.system() == 'Windows':
     extension = "dll"
 elif platform.system() == 'Linux':
     extension = "so"
-mandel_dll = CDLL(f'{file_dir}/mandelbrot.{extension}')
+mandel_dll = CDLL(f'{file_dir}/dist/mandelbrot.{extension}')
 
 mandel_c = mandel_dll.launch_mandelbrot
 mandel_c.argtypes = [POINTER(c_float), POINTER(c_float), c_int, c_float, c_int]
