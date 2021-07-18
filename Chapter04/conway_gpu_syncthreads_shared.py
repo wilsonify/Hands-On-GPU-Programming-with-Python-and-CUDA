@@ -1,7 +1,7 @@
 # Iterative Conway's game of life in Python / CUDA C
 # this version is meant to illustrate the use of shared kernel memory in CUDA.
 # written by Brian Tuomanen for "Hands on GPU Programming with Python and CUDA"
-
+import matplotlib
 import pycuda.autoinit
 import pycuda.driver as drv
 from pycuda import gpuarray
@@ -90,7 +90,7 @@ conway_ker_shared = shared_ker.get_function("conway_ker_shared")
 if __name__ == '__main__':
     # set lattice size
     N = 32
-    
+    matplotlib.use("tkagg")
     lattice = np.int32( np.random.choice([1,0], N*N, p=[0.25, 0.75]).reshape(N, N) )
     lattice_gpu = gpuarray.to_gpu(lattice)    
     

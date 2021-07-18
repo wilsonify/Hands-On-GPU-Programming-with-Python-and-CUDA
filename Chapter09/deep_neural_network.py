@@ -311,7 +311,7 @@ class SequentialNetwork:
 
         if layers is not None:
             for layer in layers:
-                add_layer(self, layer)
+                self.add_layer(self, layer)
 
     def add_layer(self, layer):
 
@@ -572,7 +572,7 @@ if __name__ == '__main__':
     iris_data = []
     iris_labels = []
 
-    with open('iris.data', 'rb') as csvfile:
+    with open('iris.data', 'rt') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
         for row in csvreader:
             newrow = []
@@ -602,15 +602,43 @@ if __name__ == '__main__':
 
     sn = SequentialNetwork(max_batch_size=32)
 
-    sn.add_layer({'type': 'dense', 'num_inputs': 4, 'num_outputs': 10, 'relu': True, 'sigmoid': False, 'weights': None,
-                  'bias': None})
-    sn.add_layer({'type': 'dense', 'num_inputs': 10, 'num_outputs': 15, 'relu': True, 'sigmoid': False, 'weights': None,
-                  'bias': None})
-    sn.add_layer({'type': 'dense', 'num_inputs': 15, 'num_outputs': 20, 'relu': True, 'sigmoid': False, 'weights': None,
-                  'bias': None})
-    sn.add_layer({'type': 'dense', 'num_inputs': 20, 'num_outputs': 3, 'relu': True, 'sigmoid': False, 'weights': None,
-                  'bias': None})
-    sn.add_layer({'type': 'softmax'})
+    sn.add_layer(dict(
+        type='dense',
+        num_inputs=4,
+        num_outputs=10,
+        relu=True,
+        sigmoid=False,
+        weights=None,
+        bias=None
+    ))
+    sn.add_layer(dict(
+        type='dense',
+        num_inputs=10,
+        num_outputs=15,
+        relu=True,
+        sigmoid=False,
+        weights=None,
+        bias=None
+    ))
+    sn.add_layer(dict(
+        type='dense',
+        num_inputs=15,
+        num_outputs=20,
+        relu=True,
+        sigmoid=False,
+        weights=None,
+        bias=None
+    ))
+    sn.add_layer(dict(
+        type='dense',
+        num_inputs=20,
+        num_outputs=3,
+        relu=True,
+        sigmoid=False,
+        weights=None,
+        bias=None
+    ))
+    sn.add_layer(dict(type='softmax'))
 
     ctrain, means, stds = condition_data(iris_train)
 

@@ -1,5 +1,6 @@
-pycuda
+pycuda~=2021.1
 scikit-cuda
-matplotlib
+matplotlib~=3.4.2
 pytest
-sympy
+sympy~=1.8
+numpy~=1.21.0

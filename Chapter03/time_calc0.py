@@ -1,11 +1,14 @@
 import numpy as np
-import pycuda.autoinit
+
 from pycuda import gpuarray
 from time import time
-import os
+
 
 
 if __name__ == "__main__":
+    from pycuda import autoinit
+    assert '_finish_up' in dir(autoinit)
+
     host_data = np.float32(np.random.random(50000000))
 
     t1 = time()

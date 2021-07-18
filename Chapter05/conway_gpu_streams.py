@@ -6,7 +6,7 @@ import pycuda.driver as drv
 from pycuda import gpuarray
 from pycuda.compiler import SourceModule
 import numpy as np
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 ker = SourceModule("""
@@ -60,45 +60,44 @@ __global__ void conway_ker(int * lattice_out, int * lattice  )
 }
 """)
 
-
 conway_ker = ker.get_function("conway_ker")
-    
+
 
 def update_gpu(frameNum, imgs, newLattices_gpu, lattices_gpu, N, streams, num_concurrent):
-    
     for k in range(num_concurrent):
-        conway_ker(  newLattices_gpu[k], lattices_gpu[k], grid=(N/32,N/32,1), block=(32,32,1), stream=streams[k]   )
-        
-        imgs[k].set_data(newLattices_gpu[k].get_async(stream=streams[k]) )
-        
+        conway_ker(newLattices_gpu[k], lattices_gpu[k], grid=(N / 32, N / 32, 1), block=(32, 32, 1), stream=streams[k])
+
+        imgs[k].set_data(newLattices_gpu[k].get_async(stream=streams[k]))
+
         lattices_gpu[k].set_async(newLattices_gpu[k], stream=streams[k])
-        
-    
+
     return imgs
-    
+
 
 if __name__ == '__main__':
     # set lattice size
     N = 128
-    
+
     num_concurrent = 4
-    
+
     streams = []
     lattices_gpu = []
     newLattices_gpu = []
-    
+
     for k in range(num_concurrent):
         streams.append(drv.Stream())
-        lattice = np.int32( np.random.choice([1,0], N*N, p=[0.25, 0.75]).reshape(N, N) )
-        lattices_gpu.append(gpuarray.to_gpu(lattice)) 
-        newLattices_gpu.append(gpuarray.empty_like(lattices_gpu[k]))      
+        lattice = np.int32(np.random.choice([1, 0], N * N, p=[0.25, 0.75]).reshape(N, N))
+        lattices_gpu.append(gpuarray.to_gpu(lattice))
+        newLattices_gpu.append(gpuarray.empty_like(lattices_gpu[k]))
 
     fig, ax = plt.subplots(nrows=1, ncols=num_concurrent)
     imgs = []
-    
+
     for k in range(num_concurrent):
-        imgs.append( ax[k].imshow(lattices_gpu[k].get_async(stream=streams[k]), interpolation='nearest') )
-    
-    ani = animation.FuncAnimation(fig, update_gpu, fargs=(imgs, newLattices_gpu, lattices_gpu, N, streams, num_concurrent) , interval=0, frames=1000, save_count=1000)    
-     
+        imgs.append(ax[k].imshow(lattices_gpu[k].get_async(stream=streams[k]), interpolation='nearest'))
+
+    ani = animation.FuncAnimation(fig, update_gpu,
+                                  fargs=(imgs, newLattices_gpu, lattices_gpu, N, streams, num_concurrent), interval=0,
+                                  frames=1000, save_count=1000)
+
     plt.show()

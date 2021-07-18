@@ -66,76 +66,79 @@ __global__ void monte_carlo(int iters, %(p)s lo, %(p)s hi, %(p)s * ys_out)
 
 
 class MonteCarloIntegrator:
-    
-    def __init__(self, math_function='y = sin(x)', precision='d', lo=0, hi=np.pi, samples_per_thread=10**5, num_blocks=100):
-        
+
+    def __init__(self, math_function='y = sin(x)', precision='d', lo=0, hi=np.pi, samples_per_thread=10 ** 5,
+                 num_blocks=100):
+
         self.math_function = math_function
-        
+
         if precision in [None, 's', 'S', 'single', np.float32]:
             self.precision = 'float'
             self.numpy_precision = np.float32
             self.p_curand = ''
-        elif precision in ['d','D', 'double', np.float64]:
+        elif precision in ['d', 'D', 'double', np.float64]:
             self.precision = 'double'
             self.numpy_precision = np.float64
             self.p_curand = '_double'
         else:
             raise Exception('precision is invalid datatype!')
-            
+
         if (hi - lo <= 0):
             raise Exception('hi - lo <= 0!')
         else:
             self.hi = hi
             self.lo = lo
-              
-        MonteCarloDict = {'p' : self.precision, 'p_curand' : self.p_curand, 'math_function' : self.math_function}
-        
+
+        MonteCarloDict = {'p': self.precision, 'p_curand': self.p_curand, 'math_function': self.math_function}
+
         self.MonteCarloCode = MonteCarloKernelTemplate % MonteCarloDict
-        
-        self.ker = SourceModule(no_extern_c=True , options=['-w'], source=self.MonteCarloCode)
-        
+
+        self.ker = SourceModule(no_extern_c=True, options=['-w'], source=self.MonteCarloCode)
+
         self.f = self.ker.get_function('monte_carlo')
-        
+
         self.num_blocks = num_blocks
-        
+
         self.samples_per_thread = samples_per_thread
-        
-            
+
     def definite_integral(self, lo=None, hi=None, samples_per_thread=None, num_blocks=None):
-        
+
         if lo is None or hi is None:
             lo = self.lo
             hi = self.hi
-            
+
         if samples_per_thread is None:
             samples_per_thread = self.samples_per_thread
-            
+
         if num_blocks is None:
             num_blocks = self.num_blocks
-            grid = (num_blocks,1,1)
+            grid = (num_blocks, 1, 1)
         else:
-            grid = (num_blocks,1,1)
-            
-        block = (32,1,1)
-        
-        num_threads = 32*num_blocks
-        
-        self.ys = gpuarray.empty((num_threads,) , dtype=self.numpy_precision)
-        
-        self.f(np.int32(samples_per_thread), self.numpy_precision(lo), self.numpy_precision(hi), self.ys, block=block, grid=grid)
-        
-        self.nintegral = np.sum(self.ys.get() )
-        
+            grid = (num_blocks, 1, 1)
+
+        block = (32, 1, 1)
+
+        num_threads = 32 * num_blocks
+
+        self.ys = gpuarray.empty((num_threads,), dtype=self.numpy_precision)
+
+        self.f(np.int32(samples_per_thread), self.numpy_precision(lo), self.numpy_precision(hi), self.ys, block=block,
+               grid=grid)
+
+        self.nintegral = np.sum(self.ys.get())
+
         return np.sum(self.nintegral)
-    
-    
-    
+
+
 if __name__ == '__main__':
 
-    integral_tests = [('y =log(x)*_P2(sin(x))', 11.733 , 18.472, 8.9999), ('y = _R( 1 + sinh(2*x)*_P2(log(x)) )', .9, 4, .584977), ('y = (cosh(x)*sin(x))/ sqrt( pow(x,3) + _P2(sin(x)))', 1.85, 4.81,  -3.34553) ]
-    
-    
+    integral_tests = [('y =log(x)*_P2(sin(x))', 11.733, 18.472, 8.9999),
+                      ('y = _R( 1 + sinh(2*x)*_P2(log(x)) )', .9, 4, .584977),
+                      ('y = (cosh(x)*sin(x))/ sqrt( pow(x,3) + _P2(sin(x)))', 1.85, 4.81, -3.34553)]
+
     for f, lo, hi, expected in integral_tests:
         mci = MonteCarloIntegrator(math_function=f, precision='d', lo=lo, hi=hi)
-        print('The Monte Carlo numerical integration of the function\n \t f: x -> %s \n \t from x = %s to x = %s is : %s ' % (f, lo, hi, mci.definite_integral()))
+        print(
+            'The Monte Carlo numerical integration of the function\n \t f: x -> %s \n \t from x = %s to x = %s is : %s ' % (
+            f, lo, hi, mci.definite_integral()))
         print('where the expected value is : %s\n' % expected)

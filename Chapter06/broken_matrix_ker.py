@@ -71,5 +71,6 @@ if __name__ == "__main__":
     output_mat_gpu = gpuarray.empty_like(test_a_gpu)
 
     matrix_ker(test_a_gpu, test_b_gpu, output_mat_gpu, np.int32(4), block=(2, 2, 1), grid=(2, 2, 1))
-
+    print(f"output_mat_gpu.get() = {output_mat_gpu.get()}")
+    print(f"output_mat = {output_mat}")
     assert (np.allclose(output_mat_gpu.get(), output_mat))

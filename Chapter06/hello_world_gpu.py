@@ -20,4 +20,4 @@ __global__ void hello_world_ker()
 ''')
 
 hello_ker = ker.get_function("hello_world_ker")
-hello_ker(  block=(5,1,1), grid=(2,1,1) )
+hello_ker(block=(5, 1, 1), grid=(2, 1, 1))

@@ -1,13 +1,14 @@
 import logging
 import os
 import platform
+from pprint import pprint
 
 from Chapter01 import mandelbrot0
 
 
 def test_smoke():
+    pprint(os.environ)
     print(f"PATH={os.environ['PATH']}")
-    print(f"CUDA_PATH={os.environ['CUDA_PATH']}")
     print(platform.system())
     logging.info("fire?")
 
